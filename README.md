@@ -54,7 +54,7 @@ This project analyzes the coding regions of genes from genomic FASTA files, conv
 
 ---
 
-## 📝 Notes
+##  Notes
 
 - Users can customize input FASTA files.  
 - The AI prompt can be used with ChatGPT or other language models for dietary analysis.  
