@@ -2,7 +2,7 @@
 
 Calculate and visualize the melting temperature (Tm) of DNA sequences.
 
-## 🔬 Background
+## Background
 Tm is the temperature at which half of a DNA duplex dissociates. It depends on:
 - Sequence length  
 - GC content  
