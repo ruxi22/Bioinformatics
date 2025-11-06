@@ -18,18 +18,18 @@ The purpose of the project is to demonstrate:
 
 Each exercise is implemented as a standalone `.py` program with a clean GUI.
 
-### ✔ Generates or loads a DNA sequence (1000–3000 nt)  
+### Generates or loads a DNA sequence (1000–3000 nt)  
 Users may:
 - Let the program create a random DNA sequence  
 **OR**
 - Paste a real FASTA sequence (e.g., from NCBI)
 
-### ✔ Extracts 10 random DNA fragments  
+### Extracts 10 random DNA fragments  
 Each fragment:
 - Has a size between 100–3000 bp  
 - Is stored in a table  
 - Is used for gel simulation  
 
-### ✔ Simulates agarose gel electrophoresis  
+### Simulates agarose gel electrophoresis  
 Migration is based on fragment size:
 
