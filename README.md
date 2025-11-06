@@ -30,6 +30,4 @@ Each fragment:
 - Is stored in a table  
 - Is used for gel simulation  
 
-### Simulates agarose gel electrophoresis  
-Migration is based on fragment size:
 
