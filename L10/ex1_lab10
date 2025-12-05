@@ -1,0 +1,102 @@
+import gradio as gr
+import numpy as np
+import matplotlib.pyplot as plt
+
+S = "ATGCGTCTAGACTGATCTATCTAAAAAAAACCCCGTAGCATCTATCGATCTATCTAGCGATCTATCTACTACG"
+WINDOW_LENGTH = 30
+
+def calculate_gc_percentage(window_sequence):
+    g_count = window_sequence.count('G')
+    c_count = window_sequence.count('C')
+    total_length = len(window_sequence)
+    if total_length == 0:
+        return 0.0
+    return ((g_count + c_count) / total_length) * 100
+
+def calculate_kappa_ic(window_sequence):
+    N = len(window_sequence)
+    if N < 2:
+        return 0.0
+    counts = {
+        'A': window_sequence.count('A'),
+        'T': window_sequence.count('T'),
+        'C': window_sequence.count('C'),
+        'G': window_sequence.count('G')
+    }
+    sum_f_squared_minus_f = sum(count * (count - 1) for count in counts.values())
+    ic_value = sum_f_squared_minus_f / (N * (N - 1))
+    return ic_value * 400
+
+def dna_pattern_analysis(dna_sequence, window_len):
+    seq_len = len(dna_sequence)
+    if seq_len < window_len:
+        return "Sequence is shorter than the window length.", None, None
+
+    window_starts = []
+    kappa_ics = []
+
+    for start in range(seq_len - window_len + 1):
+        window = dna_sequence[start:start + window_len]
+        window_starts.append(start + 1)
+        kappa_ics.append(calculate_kappa_ic(window))
+
+    ic_array = np.array(kappa_ics)
+    sum_ic = np.sum(ic_array)
+    cw = None
+    if sum_ic > 0:
+        cw = np.sum(np.array(window_starts) * ic_array) / sum_ic
+
+    fig1, ax1 = plt.subplots(figsize=(10, 5))
+    ax1.plot(window_starts, kappa_ics, marker='o', linestyle='-', color='indigo', label=r'$\kappa$ IC Pattern')
+    if cw is not None:
+        ax1.axvline(cw, color='red', linestyle='--', label=f'Center of Weight = {cw:.2f}')
+    ax1.set_title(r'$\kappa$ IC Sliding Window Pattern', fontsize=15)
+    ax1.set_xlabel(f"Window Start Position (Window = {window_len} bp)")
+    ax1.set_ylabel(r'Kappa Index of Coincidence ($\kappa$ IC)')
+    ax1.grid(True)
+    ax1.legend()
+    plt.close(fig1)
+
+    fig2, ax2 = plt.subplots(figsize=(10, 2.5))
+    if cw is not None:
+        ax2.scatter([cw], [1], color='red', s=200)
+        ax2.set_title("Center of Weight", fontsize=14)
+        ax2.set_xlabel("Sequence Position")
+        ax2.set_yticks([])
+        ax2.set_ylim(0, 2)
+        ax2.grid(True, axis='x')
+    else:
+        ax2.text(0.5, 0.5, "CW could not be computed (IC sum = 0)", ha='center', va='center', transform=ax2.transAxes)
+    plt.close(fig2)
+
+    full_seq_gc = calculate_gc_percentage(dna_sequence)
+    full_seq_ic = calculate_kappa_ic(dna_sequence)
+
+    verification_output = (
+        f"Sequence Length: {seq_len} bp\n"
+        f"Window Size: {window_len} bp\n\n"
+        f"GC Content (Whole Sequence): {full_seq_gc:.2f} %\n"
+        f"Kappa IC (Whole Sequence): {full_seq_ic:.2f}\n\n"
+        f"Center of Weight (CW): {cw:.2f}\n"
+    )
+
+    return verification_output, fig1, fig2
+
+iface = gr.Interface(
+    fn=dna_pattern_analysis,
+    inputs=[
+        gr.Textbox(label="DNA Sequence", value=S, lines=4),
+        gr.Slider(minimum=5, maximum=80, step=1, value=WINDOW_LENGTH, label="Window Size (bp)")
+    ],
+    outputs=[
+        gr.Textbox(label="Summary", lines=10),
+        gr.Plot(label=r"Sliding Window $\kappa$ IC Pattern"),
+        gr.Plot(label="Center of Weight")
+    ],
+    title="DNA Promoter Pattern Analyzer",
+    description="Sliding window kappa IC and Center of Weight calculator.",
+    theme="huggingface"
+)
+
+if __name__ == "__main__":
+    iface.launch()
